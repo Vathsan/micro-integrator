@@ -25,13 +25,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -134,12 +132,26 @@ public class CarbonUtils {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             Source xmlSource = new DOMSource(doc);
             Result result = new StreamResult(outputStream);
-            TransformerFactory.newInstance().newTransformer().transform(xmlSource, result);
+            TransformerFactory factory = getSecuredTransformerFactory();
+            factory.newTransformer().transform(xmlSource, result);
             InputStream in = new ByteArrayInputStream(outputStream.toByteArray());
             return in;
         } catch (TransformerException var5) {
             throw new CarbonException("Error in transforming DOM to InputStream", var5);
         }
+    }
+
+    /**
+     * Create a secure process enabled TransformerFactory.
+     *
+     * @return
+     * @throws TransformerConfigurationException
+     */
+    public static TransformerFactory getSecuredTransformerFactory() throws TransformerConfigurationException {
+
+        TransformerFactory factory = TransformerFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        return factory;
     }
 
     private static DocumentBuilderFactory getSecuredDocumentBuilder() {
