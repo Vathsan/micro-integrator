@@ -29,11 +29,17 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.wso2.micro.integrator.management.apis.internal.DataHolder;
 import org.wso2.micro.service.mgt.ServiceAdmin;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.Properties;
 
 public class Utils {
 
@@ -105,5 +111,41 @@ public class Utils {
             serviceAdmin.init(messageContext.getConfiguration().getAxisConfiguration());
         }
         return serviceAdmin;
+    }
+
+    /**
+     * Util method to return the specified  property from a properties file.
+     *
+     * @param srcFile - The source file which needs to be looked up.
+     * @param key     - Key of the property.
+     * @return - Value of the property.
+     */
+    public static String getProperty(File srcFile, String key) {
+
+        String value = null;
+        try (FileInputStream fis = new FileInputStream(srcFile)) {
+            Properties properties = new Properties();
+            properties.load(fis);
+            value = properties.getProperty(key);
+        } catch (Exception e) {
+            LOG.error("Error occurred while retrieving the property" + e.getMessage());
+        }
+        return value;
+    }
+
+    /**
+     * Method to update pax-logging configuration.
+     */
+    public static void updateLoggingConfiguration() throws IOException {
+
+        ConfigurationAdmin configurationAdmin = DataHolder.getInstance().getConfigurationAdmin();
+        if (configurationAdmin != null) {
+            Configuration configuration =
+                    configurationAdmin.getConfiguration(Constants.PAX_LOGGING_CONFIGURATION_PID, "?");
+            configuration.update();
+        } else {
+            LOG.error("Unable to apply logging configuration, Continuing with previous logging configuration");
+        }
+
     }
 }

@@ -56,8 +56,9 @@ public class Constants {
     public static final String LEVEL = "level";
     public static final String PARENT = "parent";
     public static final String LOGGER_NAME = "loggerName";
+    public static final String COMPONENT_NAME = "componentName";
     public static final String LOGGING_LEVEL = "loggingLevel";
-    public static final String ROOT_LOGGER = "root";
+    public static final String ROOT_LOGGER = "rootLogger";
 
     public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";
     public static final String HTTP_STATUS_CODE = "HTTP_SC";
@@ -82,4 +83,8 @@ public class Constants {
     // Synapse service statuses
     public static final String ACTIVE_STATUS = "active";
     public static final String INACTIVE_STATUS = "inactive";
+
+    // Constants on pax-logging
+    public static final String PAX_LOGGING_CONFIGURATION_PID = "org.ops4j.pax.logging";
+    public static final String PAX_LOGGING_CONFIGURATION_TOPIC = "org/ops4j/pax/logging/Configuration";
 }
