@@ -39,7 +39,6 @@
             <groupId>org.wso2.orbit.com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -52,6 +51,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Private-Package>org.wso2.micro.integrator.management.apis.internal</Private-Package>
                         <Export-Package>
                             org.wso2.micro.integrator.management.apis.*;version="${project.version}"
                         </Export-Package>
