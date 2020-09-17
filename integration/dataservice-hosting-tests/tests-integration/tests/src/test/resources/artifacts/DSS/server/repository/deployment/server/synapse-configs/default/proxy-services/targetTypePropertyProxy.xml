@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxy xmlns="http://ws.apache.org/ns/synapse"
+       name="targetTypePropertyProxy"
+       transports="http https"
+       startOnLoad="true">
+    <description/>
+    <target>
+        <inSequence>
+            <dataServicesCall serviceName="DSSCallMediatorTest">
+                <source type="inline"/>
+                <operations type="single_req">
+                    <operation name="addEmployee">
+                        <param name="employeeNumber" type="int" value="123"/>
+                        <param name="firstname" type="string" value="Craig"/>
+                        <param name="lastName" type="string" value="Overton"/>
+                        <param name="email" type="string" value="craig@wso2.com"/>
+                        <param name="salary" type="int" value="123"/>
+                    </operation>
+                </operations>
+                <target type="property" name="responseProperty"/>
+            </dataServicesCall>
+            <log level="custom">
+                <property name="responsePayload" expression="$ctx:responseProperty"/>
+            </log>
+            <respond/>
+        </inSequence>
+    </target>
+</proxy>
