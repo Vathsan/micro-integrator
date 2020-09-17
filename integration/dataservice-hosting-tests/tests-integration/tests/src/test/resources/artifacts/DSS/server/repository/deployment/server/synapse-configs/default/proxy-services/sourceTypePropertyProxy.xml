@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxy xmlns="http://ws.apache.org/ns/synapse"
+       name="sourceTypePropertyProxy"
+       transports="http https"
+       startOnLoad="true">
+    <description/>
+    <target>
+        <inSequence>
+            <payloadFactory media-type="xml">
+                <format>
+                    <addEmployee>
+                        <EmployeeNumber>999</EmployeeNumber>
+                        <Firstname>Amelia</Firstname>
+                        <LastName>Vicar</LastName>
+                        <Email>amelia@wso2.com</Email>
+                        <Salary>99</Salary>
+                    </addEmployee>
+                </format>
+                <args/>
+            </payloadFactory>
+            <property name="requestProperty" expression="$body/*"/>
+            <dataServicesCall serviceName="DSSCallMediatorTest">
+                <source type="property" name="requestProperty"/>
+                <target type="body"/>
+            </dataServicesCall>
+            <respond/>
+        </inSequence>
+    </target>
+</proxy>
