@@ -43,6 +43,8 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.mediators.Value;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.util.MessageHelper;
+import org.json.JSONObject;
+import org.json.XML;
 import org.w3c.dom.Document;
 import org.wso2.micro.integrator.dataservices.core.DataServiceFault;
 import org.wso2.micro.integrator.dataservices.core.DataServiceProcessor;
@@ -110,42 +112,11 @@ public class DataServiceCallMediator extends AbstractMediator {
                 // Set the axis service into the axis2 message context
                 axis2MessageContext.setAxisService(axisService);
                 if (sourceType.equalsIgnoreCase(DataServiceCallMediatorConstants.INLINE_SOURCE)) {
-                    OMElement payload = addRootOperation(axis2MessageContext, messageContext);
-                    if (axis2MessageContext.getEnvelope().getBody().getFirstElement() != null) {
-                        axis2MessageContext.getEnvelope().getBody().getFirstElement().detach();
-                    }
-                    axis2MessageContext.getEnvelope().getBody().addChild(payload);
+                    axis2MessageContext = handleSourceTypeInline(messageContext, axis2MessageContext);
                 } else if (DataServiceCallMediatorConstants.SOURCE_PROPERTY_TYPE.equals(sourceType)) {
-                    if (sourceDynamicName != null) {
-                        sourcePropertyName = sourceDynamicName.evaluateValue(messageContext);
-                        if (StringUtils.isEmpty(sourcePropertyName)) {
-                            log.warn("Evaluated value for " + sourcePropertyName + " is empty");
-                        }
-                    }
-                    String payload = (String) messageContext.getProperty(sourcePropertyName);
-                    try {
-                        if (!StringUtils.isEmpty(payload)) {
-                            InputStream inputStream = new ByteArrayInputStream(payload.getBytes());
-                            SOAPEnvelope envelope = TransportUtils.createSOAPMessage(
-                                    axis2MessageContext, inputStream, DataServiceCallMediatorConstants.APPLICATION_XML);
-                            String rootOperation = envelope.getBody().getFirstElement().getLocalName();
-                            axis2MessageContext.getAxisMessage().getAxisOperation().setName(new QName(rootOperation));
-                            axis2MessageContext.setEnvelope(envelope);
-                        } else {
-                            handleException("Error occurred while building request. Received payload is empty.", messageContext);
-                        }
-                    } catch (XMLStreamException exception) {
-                        handleException("Error occurred while building message for dataservice request", exception, messageContext);
-                    }
+                    axis2MessageContext = handleSourceTypeProperty(messageContext, axis2MessageContext);
                 } else {
-                    OMElement operationElement = axis2MessageContext.getEnvelope().getBody().getFirstElement();
-                    if (operationElement != null) {
-                        String rootOperation = operationElement.getLocalName();
-                        QName rootOpQName = new QName(rootOperation);
-                        axis2MessageContext.getAxisMessage().getAxisOperation().setName(rootOpQName);
-                    } else {
-                        handleException("Source type is set to body. Received empty payload for request.", messageContext);
-                    }
+                    axis2MessageContext = handleSourceTypeBody(messageContext, axis2MessageContext);
                 }
                 dispatchToService(axis2MessageContext, messageContext);
             } else {
@@ -159,6 +130,57 @@ public class DataServiceCallMediator extends AbstractMediator {
             handleException("AxisFault occurred.", axisFault, messageContext);
         }
         return true;
+    }
+
+    private org.apache.axis2.context.MessageContext handleSourceTypeInline(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
+        OMElement payload = addRootOperation(axis2MessageContext, messageContext);
+        if (axis2MessageContext.getEnvelope().getBody().getFirstElement() != null) {
+            axis2MessageContext.getEnvelope().getBody().getFirstElement().detach();
+        }
+        axis2MessageContext.getEnvelope().getBody().addChild(payload);
+        return axis2MessageContext;
+    }
+
+    private org.apache.axis2.context.MessageContext handleSourceTypeBody(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
+        OMElement operationElement = axis2MessageContext.getEnvelope().getBody().getFirstElement();
+        if (operationElement != null) {
+            String rootOperation = operationElement.getLocalName();
+            QName rootOpQName = new QName(rootOperation);
+            axis2MessageContext.getAxisMessage().getAxisOperation().setName(rootOpQName);
+        } else {
+            handleException("Source type is set to body. Received empty payload for request.", messageContext);
+        }
+        return axis2MessageContext;
+    }
+
+    private org.apache.axis2.context.MessageContext handleSourceTypeProperty(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) throws AxisFault {
+        if (sourceDynamicName != null) {
+            sourcePropertyName = sourceDynamicName.evaluateValue(messageContext);
+            if (StringUtils.isEmpty(sourcePropertyName)) {
+                handleException("Evaluated value for " + sourcePropertyName + " is empty", messageContext);
+            }
+        }
+        String payload = messageContext.getProperty(sourcePropertyName).toString();
+        try {
+            if (!StringUtils.isEmpty(payload)) {
+                if (payload.trim().charAt(0) == '{') {
+                    JSONObject json = new JSONObject(payload);
+                    payload = XML.toString(json);
+                }
+                InputStream inputStream = new ByteArrayInputStream(payload.getBytes());
+                SOAPEnvelope envelope = TransportUtils.createSOAPMessage(
+                        axis2MessageContext, inputStream, DataServiceCallMediatorConstants.APPLICATION_XML);
+                String rootOperation = envelope.getBody().getFirstElement().getLocalName();
+                axis2MessageContext.getAxisMessage().getAxisOperation().setName(new QName(rootOperation));
+                axis2MessageContext.setEnvelope(envelope);
+            } else {
+                handleException("Error occurred while building request. Received payload is empty.", messageContext);
+            }
+            return axis2MessageContext;
+        } catch (XMLStreamException exception) {
+            handleException("Error occurred while building message for dataservice request", exception, messageContext);
+        }
+        return axis2MessageContext;
     }
 
     private OMElement addRootOperation(org.apache.axis2.context.MessageContext axis2MessageContext,
