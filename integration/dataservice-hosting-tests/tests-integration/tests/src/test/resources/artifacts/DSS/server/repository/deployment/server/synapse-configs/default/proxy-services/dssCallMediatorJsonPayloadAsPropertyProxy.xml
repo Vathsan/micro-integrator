@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxy xmlns="http://ws.apache.org/ns/synapse"
+       name="dssCallMediatorJsonPayloadAsPropertyProxy"
+       transports="http https"
+       startOnLoad="true">
+    <description/>
+    <target>
+        <inSequence>
+            <property name="sourceProperty" expression="json-eval($.)"/>
+            <dataServicesCall serviceName="DSSCallMediatorTest">
+                <source type="property" name="sourceProperty"/>
+                <target type="body"/>
+            </dataServicesCall>
+            <respond/>
+        </inSequence>
+    </target>
+</proxy>

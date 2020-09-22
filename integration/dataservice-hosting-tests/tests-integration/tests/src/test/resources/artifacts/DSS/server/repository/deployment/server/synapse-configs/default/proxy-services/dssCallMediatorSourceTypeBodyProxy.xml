@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxy xmlns="http://ws.apache.org/ns/synapse"
+       name="dssCallMediatorSourceTypeBodyProxy"
+       transports="http https"
+       startOnLoad="true">
+    <description/>
+    <target>
+        <inSequence>
+            <dataServicesCall serviceName="DSSCallMediatorTest">
+                <source type="body"/>
+                <target type="body"/>
+            </dataServicesCall>
+            <respond/>
+        </inSequence>
+    </target>
+</proxy>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxy xmlns="http://ws.apache.org/ns/synapse"
+       name="dssCallMediatorInlineBatchRequestProxy"
+       transports="http https"
+       startOnLoad="true">
+    <description/>
+    <target>
+        <inSequence>
+            <dataServicesCall serviceName="DSSCallMediatorTest">
+                <source type="inline"/>
+                <operations type="batch_req">
+                    <operation name="addEmployee">
+                        <param name="employeeNumber" type="int" value="222"/>
+                        <param name="firstname" type="string" value="John"/>
+                        <param name="lastName" type="string" value="Doe"/>
+                        <param name="email" type="string" value="john@wso2.com"/>
+                        <param name="salary" type="int" value="22"/>
+                    </operation>
+                    <operation name="addEmployee">
+                        <param name="employeeNumber" type="int" value="333"/>
+                        <param name="firstname" type="string" value="Joel"/>
+                        <param name="lastName" type="string" value="Miller"/>
+                        <param name="email" type="string" value="joel@wso2.com"/>
+                        <param name="salary" type="int" value="33"/>
+                    </operation>
+                </operations>
+                <target type="body"/>
+            </dataServicesCall>
+            <respond/>
+        </inSequence>
+    </target>
+</proxy>
