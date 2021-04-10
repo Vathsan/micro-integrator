@@ -1378,7 +1378,7 @@
         <org.objenesis.version>2.1</org.objenesis.version>
 
         <!-- Apache Axis2 -->
-        <axis2.wso2.version>1.6.1-wso2v60</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v63</axis2.wso2.version>
         <imp.pkg.version.axis2>[1.6.1, 1.7.0)</imp.pkg.version.axis2>
 
         <carbon.analytics.common.version>5.2.34</carbon.analytics.common.version>
